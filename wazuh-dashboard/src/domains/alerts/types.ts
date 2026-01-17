@@ -1,34 +1,15 @@
-export interface WazuhAlert {
+export interface NormalizedAlert {
   id: string;
   timestamp: string;
-  rule: {
-    level: number;
-    description: string;
-    id: string;
-    groups: string[];
-    firedtimes: number;
-  };
+  source: string;
   agent: {
-    id: string;
-    name: string;
-    ip: string;
+    name: string | null;
+    ip: string | null;
   };
-  manager: {
-    name: string;
-  };
-  location: string;
-  // Flexible payload to handle Windows, Linux, or custom logs
-  data?: {
-    win?: {
-      system: {
-        eventID: string;
-        severityValue: string;
-        message: string;
-        providerName: string;
-      };
-    };
-    [key: string]: any; 
-  };
+  severity: number;
+  level: 'low' | 'medium' | 'high' | 'critical';
+  category: string;
+  title: string;
 }
 
 export interface AlertStats {

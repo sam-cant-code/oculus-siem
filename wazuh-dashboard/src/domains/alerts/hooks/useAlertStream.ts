@@ -1,8 +1,9 @@
 import { useEffect, useRef } from 'react';
-import { useAlertsStore } from '../stores/useAlertsStore';
+import { useAlertsStore } from '@/domains/alerts/stores/useAlertsStore';
+import type { NormalizedAlert } from '@/domains/alerts/types';
 
 // Ensure this matches your backend port
-const WS_URL = 'ws://localhost:9001/ws';
+const WS_URL = import.meta.env.VITE_WEBSOCKET_URL
 
 export const useAlertStream = () => {
   const { addAlert, setConnectionStatus } = useAlertsStore();
@@ -29,8 +30,9 @@ export const useAlertStream = () => {
 
       socket.onmessage = (event) => {
         try {
-          const data = JSON.parse(event.data);
-          if (data && data.rule) {
+          const data = JSON.parse(event.data) as NormalizedAlert;
+          // Validate it is a normalized message from our backend
+          if (data && data.source === 'wazuh') {
             addAlert(data);
           }
         } catch (err) {
@@ -45,7 +47,7 @@ export const useAlertStream = () => {
         
         // Clear any existing timeout before setting a new one
         clearTimeout(reconnectTimeout.current);
-        reconnectTimeout.current = setTimeout(connect, 3000) as unknown as number;
+        reconnectTimeout.current = window.setTimeout(connect, 3000);
       };
 
       socket.onerror = (err) => {

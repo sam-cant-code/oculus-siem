@@ -1,13 +1,13 @@
 import { create } from 'zustand';
-import type { WazuhAlert, AlertStats } from '../types'; // <--- Added "type"
+import type { NormalizedAlert, AlertStats } from '@/domains/alerts/types';
 
 interface AlertsState {
-  alerts: WazuhAlert[];
+  alerts: NormalizedAlert[];
   isConnected: boolean;
   stats: AlertStats;
   
   // Actions
-  addAlert: (alert: WazuhAlert) => void;
+  addAlert: (alert: NormalizedAlert) => void;
   setConnectionStatus: (status: boolean) => void;
   clearAlerts: () => void;
 }
@@ -25,13 +25,16 @@ export const useAlertsStore = create<AlertsState>((set) => ({
   },
 
   addAlert: (newAlert) => set((state) => {
-    // 1. Calculate Stats (lightweight math)
-    const level = newAlert.rule.level;
+    // 1. Calculate Stats
+    const isCritical = newAlert.level === 'critical';
+    const isHigh = newAlert.level === 'high';
+    const agentName = newAlert.agent.name || 'Unknown';
+
     const newStats = {
       total: state.stats.total + 1,
-      critical: state.stats.critical + (level >= 12 ? 1 : 0),
-      high: state.stats.high + (level >= 7 && level < 12 ? 1 : 0),
-      agents: new Set(state.stats.agents).add(newAlert.agent.name),
+      critical: state.stats.critical + (isCritical ? 1 : 0),
+      high: state.stats.high + (isHigh ? 1 : 0),
+      agents: new Set(state.stats.agents).add(agentName),
     };
 
     // 2. Add to list with buffer limit

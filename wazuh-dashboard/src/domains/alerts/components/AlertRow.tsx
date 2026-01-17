@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import type { WazuhAlert } from '../types';
+import type { NormalizedAlert } from '@/domains/alerts/types';
 import { ChevronDown, ChevronRight, Monitor, Terminal } from 'lucide-react';
-import { Badge } from '../../../components/ui/Badge';
+import { Badge } from '@/components/ui/Badge';
 
 // Helper for color coding levels
 const getLevelStyle = (level: number) => {
@@ -11,9 +11,10 @@ const getLevelStyle = (level: number) => {
   return 'border-l-blue-500 text-blue-400 bg-blue-500/5';
 };
 
-export const AlertRow = ({ alert }: { alert: WazuhAlert }) => {
+export const AlertRow = ({ alert }: { alert: NormalizedAlert }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const rowStyle = getLevelStyle(alert.rule.level);
+  // UPDATED: Uses alert.severity
+  const rowStyle = getLevelStyle(alert.severity);
 
   return (
     <div className="border-b border-siem-border hover:bg-slate-900/50 transition-colors group">
@@ -32,15 +33,17 @@ export const AlertRow = ({ alert }: { alert: WazuhAlert }) => {
 
         <div className="w-40 flex items-center text-xs font-medium text-slate-300 shrink-0 gap-2">
           <Monitor size={14} className="text-slate-600" />
-          <span className="truncate">{alert.agent.name}</span>
+          <span className="truncate">{alert.agent.name || 'Unknown'}</span>
         </div>
 
         <div className="flex-1 text-sm text-slate-200 truncate pr-4">
-          {alert.rule.description}
+          {/* UPDATED: Uses alert.title */}
+          {alert.title}
         </div>
 
-        <Badge variant={alert.rule.level >= 12 ? 'critical' : 'outline'}>
-          Lvl {alert.rule.level}
+        {/* UPDATED: Uses alert.severity */}
+        <Badge variant={alert.severity >= 12 ? 'critical' : 'outline'}>
+          Lvl {alert.severity}
         </Badge>
       </div>
 
@@ -52,9 +55,11 @@ export const AlertRow = ({ alert }: { alert: WazuhAlert }) => {
           <div className="space-y-3 font-mono text-xs">
             <h4 className="text-slate-500 font-bold uppercase tracking-wider">Metadata</h4>
             <div className="grid grid-cols-[80px_1fr] gap-y-2 text-slate-400">
-              <span>Rule ID:</span> <span className="text-slate-200">{alert.rule.id}</span>
-              <span>Groups:</span> <span>{alert.rule.groups.join(', ')}</span>
-              <span>Location:</span> <span className="break-all">{alert.location}</span>
+              {/* UPDATED: Uses category instead of rule.groups */}
+              <span>Category:</span> <span>{alert.category}</span>
+              {/* UPDATED: Uses agent.ip instead of location */}
+              <span>IP Addr:</span> <span className="break-all">{alert.agent.ip || 'N/A'}</span>
+              <span>Source:</span> <span className="text-slate-200">{alert.source}</span>
             </div>
           </div>
 
@@ -65,7 +70,8 @@ export const AlertRow = ({ alert }: { alert: WazuhAlert }) => {
             </h4>
             <div className="bg-slate-950 p-3 rounded border border-siem-border overflow-x-auto max-h-60">
               <pre className="text-xs font-mono text-slate-300">
-                {JSON.stringify(alert.data || {}, null, 2)}
+                {/* Normalized alerts might not have 'data', showing full object for debug */}
+                {JSON.stringify(alert, null, 2)}
               </pre>
             </div>
           </div>
