@@ -6,9 +6,13 @@ interface AlertsState {
   isConnected: boolean;
   stats: AlertStats;
   
+  // Filtering State
+  visibleSeverities: Record<'low' | 'medium' | 'high' | 'critical', boolean>;
+
   // Actions
   addAlert: (alert: NormalizedAlert) => void;
   setConnectionStatus: (status: boolean) => void;
+  toggleSeverityVisibility: (level: 'low' | 'medium' | 'high' | 'critical') => void;
   clearAlerts: () => void;
 }
 
@@ -17,11 +21,20 @@ const MAX_ALERTS = 500;
 export const useAlertsStore = create<AlertsState>((set) => ({
   alerts: [],
   isConnected: false,
+  
   stats: {
     total: 0,
     critical: 0,
     high: 0,
     agents: new Set(),
+  },
+
+  // Default all filters to visible
+  visibleSeverities: {
+    critical: true,
+    high: true,
+    medium: true,
+    low: true,
   },
 
   addAlert: (newAlert) => set((state) => {
@@ -38,7 +51,6 @@ export const useAlertsStore = create<AlertsState>((set) => ({
     };
 
     // 2. Add to list with buffer limit
-    // We add to the front [new, ...old] so the newest is always top
     const updatedAlerts = [newAlert, ...state.alerts].slice(0, MAX_ALERTS);
 
     return {
@@ -48,6 +60,13 @@ export const useAlertsStore = create<AlertsState>((set) => ({
   }),
 
   setConnectionStatus: (status) => set({ isConnected: status }),
+
+  toggleSeverityVisibility: (level) => set((state) => ({
+    visibleSeverities: {
+      ...state.visibleSeverities,
+      [level]: !state.visibleSeverities[level],
+    }
+  })),
   
   clearAlerts: () => set({ 
     alerts: [], 
