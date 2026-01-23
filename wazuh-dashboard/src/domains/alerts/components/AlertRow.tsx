@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { NormalizedAlert } from '@/domains/alerts/types';
-import { ChevronDown, ChevronRight, Monitor, Terminal } from 'lucide-react';
+import { ChevronDown, ChevronRight, Monitor, Terminal, Bug } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
 
 // Helper for color coding levels
@@ -36,9 +36,27 @@ export const AlertRow = ({ alert }: { alert: NormalizedAlert }) => {
           <span className="truncate">{alert.agent.name || 'Unknown'}</span>
         </div>
 
-        <div className="flex-1 text-sm text-slate-200 truncate pr-4">
-          {/* UPDATED: Uses alert.title */}
-          {alert.title}
+        {/* ✅ UPDATED SECTION: Title + MITRE Badge */}
+        <div className="flex-1 flex flex-col justify-center min-w-0 pr-4 gap-1.5">
+          {/* Title */}
+          <div className="text-sm text-slate-200 truncate">
+            {alert.title}
+          </div>
+
+          {/* MITRE Badge (Only renders if enrichment exists) */}
+          {alert.mitre && (
+            <div className="flex items-center gap-2">
+              <div 
+                className="flex items-center gap-1.5 bg-purple-500/10 border border-purple-500/40 px-1.5 py-0.5 rounded-[4px] text-[10px] text-purple-300 hover:bg-purple-500/20 transition-colors cursor-help w-fit" 
+                title={alert.mitre.technique_name}
+              >
+                <Bug size={10} />
+                <span className="font-bold text-purple-400">{alert.mitre.technique_id}</span>
+                <span className="text-purple-500/50">|</span>
+                <span className="uppercase tracking-wide">{alert.mitre.tactic}</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* UPDATED: Uses alert.severity */}
@@ -60,6 +78,16 @@ export const AlertRow = ({ alert }: { alert: NormalizedAlert }) => {
               {/* UPDATED: Uses agent.ip instead of location */}
               <span>IP Addr:</span> <span className="break-all">{alert.agent.ip || 'N/A'}</span>
               <span>Source:</span> <span className="text-slate-200">{alert.source}</span>
+              
+              {/* Explicitly show MITRE details in expanded view too */}
+              {alert.mitre && (
+                <>
+                  <span className="text-purple-400">MITRE:</span>
+                  <span className="text-purple-300">
+                    {alert.mitre.technique_name} ({alert.mitre.technique_id})
+                  </span>
+                </>
+              )}
             </div>
           </div>
 
