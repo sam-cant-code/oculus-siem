@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+@theme {
+  /* Cyber-HUD Palette */
+  --color-siem-bg: #0b0c10;       /* Deepest Void */
+  --color-siem-panel: #1f2833;    /* Panel Grey */
+  --color-siem-border: #45a29e;   /* Glowing Teal Border */
+  --color-siem-accent: #66fcf1;   /* Bright Cyan Text */
+  --color-siem-success: #10b981;  /* System Green */
+  --color-siem-critical: #f87171; /* Alert Red */
+}
+
+/* Global Styles */
+body {
+  background-color: var(--color-siem-bg);
+  background-image: radial-gradient(circle at 50% 50%, #1f2833 0%, #0b0c10 100%);
+  color: #c5c6c7;
+  font-family: 'Inter', sans-serif;
+  overflow: hidden;
+}
+
+/* Scrollbar styling to match the dark theme */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-siem-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-siem-border);
+  border-radius: 3px;
+}
